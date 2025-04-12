@@ -249,7 +249,6 @@
             const today = new Date();
             const detentionDate = new Date(data.detentionDate);
             const arrestDate = new Date(data.arrestDate);
-            const releaseDate = data.releaseDate ? new Date(data.releaseDate) : null;
             
             // Durum bilgisini güncelle
             const statusBadge = document.getElementById('statusBadge');
@@ -265,30 +264,16 @@
             document.getElementById('detentionDate').textContent = formatDate(detentionDate);
             document.getElementById('arrestDate').textContent = formatDate(arrestDate);
             
-            // Serbest kalma durumları kaldırıldı
-            
             // Süreleri hesapla ve güncelle
-            if (data.isReleased && releaseDate) {
-                // Eğer serbest bırakıldıysa, serbest bırakılma tarihine kadar olan süreyi hesapla
-                const daysNotFree = Math.floor((releaseDate.getTime() - detentionDate.getTime()) / (1000 * 3600 * 24));
-                const daysArrested = Math.floor((releaseDate.getTime() - arrestDate.getTime()) / (1000 * 3600 * 24));
-                
-                document.getElementById('daysNotFree').textContent = daysNotFree;
-                document.getElementById('daysArrested').textContent = daysArrested;
-            } else {
-                // Eğer hala tutuklu ise, bugüne kadar olan süreyi hesapla
-                const daysNotFree = Math.floor((today.getTime() - detentionDate.getTime()) / (1000 * 3600 * 24));
-                const daysArrested = Math.floor((today.getTime() - arrestDate.getTime()) / (1000 * 3600 * 24));
-                
-                document.getElementById('daysNotFree').textContent = daysNotFree;
-                document.getElementById('daysArrested').textContent = daysArrested;
-            }
+            const daysNotFree = Math.floor((today.getTime() - detentionDate.getTime()) / (1000 * 3600 * 24));
+            const daysArrested = Math.floor((today.getTime() - arrestDate.getTime()) / (1000 * 3600 * 24));
+            
+            document.getElementById('daysNotFree').textContent = daysNotFree;
+            document.getElementById('daysArrested').textContent = daysArrested;
             
             // Son güncelleme tarihini güncelle
-            document.getElementById('lastUpdate').textContent = formatDate(new Date(data.lastUpdate));
+            document.getElementById('lastUpdate').textContent = formatDate(new Date());
         }
-        
-        // Serbest kalma durumu fonksiyonu kaldırıldı
         
         // Tarih formatlama fonksiyonu
         function formatDate(date) {
