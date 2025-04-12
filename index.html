@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ekrem İmamoğlu - Özgürlük Sayacı</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            text-align: center;
+            background-color: white;
+            border-radius: 10px;
+            padding: 40px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            width: 90%;
+        }
+        .photo {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 0 auto 20px;
+            display: block;
+            border: 5px solid #e0e0e0;
+        }
+        h1 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .role {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            color: #555;
+        }
+        .status {
+            margin-bottom: 20px;
+            padding: 10px 20px;
+            border-radius: 30px;
+            display: inline-block;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        .status.free {
+            background-color: #2ecc71;
+            color: white;
+        }
+        .status.not-free {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .counters {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            margin: 20px 0;
+        }
+        .counter {
+            flex: 1;
+            min-width: 250px;
+            padding: 20px;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.05);
+        }
+        .counter-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #555;
+        }
+        .counter-value {
+            font-size: 4rem;
+            font-weight: bold;
+            color: #e74c3c;
+            margin: 15px 0;
+        }
+        .counter-info {
+            color: #777;
+            font-size: 0.9rem;
+        }
+        .details {
+            color: #777;
+            margin: 30px 0 20px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .footer {
+            margin-top: 30px;
+            font-size: 0.9rem;
+            color: #888;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+        .data-update {
+            margin-top: 15px;
+            padding: 8px 15px;
+            background-color: #f0f0f0;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .data-update:hover {
+            background-color: #e0e0e0;
+        }
+        @media (max-width: 768px) {
+            .counters {
+                flex-direction: column;
+            }
+            .counter {
+                min-width: unset;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Ekrem_%C4%B0mamo%C4%9Flu_2024.png/500px-Ekrem_%C4%B0mamo%C4%9Flu_2024.png" alt="Ekrem İmamoğlu" class="photo">
+        <h1>Ekrem İmamoğlu</h1>
+        <div class="role">İstanbul Büyükşehir Belediye Başkanı</div>
+        
+        <div id="statusBadge" class="status not-free">Serbest Bırakılmadı</div>
+        
+        <div class="counters">
+            <div class="counter">
+                <div class="counter-title">Özgür Olmadığı Süre</div>
+                <div class="counter-value" id="daysNotFree">--</div>
+                <div class="counter-info">
+                    Gözaltına Alınma: <span id="detentionDate">--</span>
+                </div>
+            </div>
+            
+            <div class="counter">
+                <div class="counter-title">Tutukluluk Süresi</div>
+                <div class="counter-value" id="daysArrested">--</div>
+                <div class="counter-info">
+                    Tutuklanma: <span id="arrestDate">--</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="details">
+            Son Güncelleme: <span id="lastUpdate">--</span>
+        </div>
+        
+        <div class="footer">
+            Bu sayaç, veri güncellemesi yapıldığında otomatik olarak değişir.<br>
+            <button id="refreshButton" class="data-update">Verileri Yenile</button>
+        </div>
+    </div>
+
+    <script>
+        // JSON dosyasından verileri çekme
+        async function fetchData() {
+            try {
+                const response = await fetch('./data.json');
+                const data = await response.json();
+                updateUI(data);
+            } catch (error) {
+                console.error('Veri çekme hatası:', error);
+                alert('Veriler güncellenirken bir hata oluştu.');
+            }
+        }
+        
+        // UI'ı güncelleyen fonksiyon
+        function updateUI(data) {
+            const today = new Date();
+            const detentionDate = new Date(data.detentionDate);
+            const arrestDate = new Date(data.arrestDate);
+            const releaseDate = data.releaseDate ? new Date(data.releaseDate) : null;
+            
+            // Durum bilgisini güncelle
+            const statusBadge = document.getElementById('statusBadge');
+            if (data.isReleased) {
+                statusBadge.textContent = 'Serbest Bırakıldı';
+                statusBadge.className = 'status free';
+            } else {
+                statusBadge.textContent = 'Serbest Bırakılmadı';
+                statusBadge.className = 'status not-free';
+            }
+            
+            // Tarih bilgilerini güncelle
+            document.getElementById('detentionDate').textContent = formatDate(detentionDate);
+            document.getElementById('arrestDate').textContent = formatDate(arrestDate);
+            
+            // Serbest kalma durumları kaldırıldı
+            
+            // Süreleri hesapla ve güncelle
+            if (data.isReleased && releaseDate) {
+                // Eğer serbest bırakıldıysa, serbest bırakılma tarihine kadar olan süreyi hesapla
+                const daysNotFree = Math.floor((releaseDate.getTime() - detentionDate.getTime()) / (1000 * 3600 * 24));
+                const daysArrested = Math.floor((releaseDate.getTime() - arrestDate.getTime()) / (1000 * 3600 * 24));
+                
+                document.getElementById('daysNotFree').textContent = daysNotFree;
+                document.getElementById('daysArrested').textContent = daysArrested;
+            } else {
+                // Eğer hala tutuklu ise, bugüne kadar olan süreyi hesapla
+                const daysNotFree = Math.floor((today.getTime() - detentionDate.getTime()) / (1000 * 3600 * 24));
+                const daysArrested = Math.floor((today.getTime() - arrestDate.getTime()) / (1000 * 3600 * 24));
+                
+                document.getElementById('daysNotFree').textContent = daysNotFree;
+                document.getElementById('daysArrested').textContent = daysArrested;
+            }
+            
+            // Son güncelleme tarihini güncelle
+            document.getElementById('lastUpdate').textContent = formatDate(new Date(data.lastUpdate));
+        }
+        
+        // Serbest kalma durumu fonksiyonu kaldırıldı
+        
+        // Tarih formatlama fonksiyonu
+        function formatDate(date) {
+            return date.toLocaleDateString('tr-TR');
+        }
+        
+        // Sayfa yüklendiğinde verileri çek
+        document.addEventListener('DOMContentLoaded', fetchData);
+        
+        // Yenile butonuna tıklandığında verileri yeniden çek
+        document.getElementById('refreshButton').addEventListener('click', fetchData);
+    </script>
+</body>
+</html>
+
